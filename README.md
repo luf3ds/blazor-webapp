@@ -168,16 +168,6 @@ dotnet run
 
 ---
 
-## 👨‍💻 Equipe
-
-**Luis Felipe Dias de Souza**
-
-Universidade Santa Cecília - UNISANTA
-
-Disciplina: Aplicações para Desktop
-
----
-
 ## 📄 Licença
 
 Projeto desenvolvido para fins acadêmicos.
