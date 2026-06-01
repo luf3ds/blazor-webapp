@@ -1,0 +1,742 @@
+﻿@page "/"
+@using RpgShop.Models
+@using RpgShop.DAO
+
+<div class="rpg-page-container">
+    <header class="rpg-header">
+        <h1 class="font-cinzel">Taverna do Aventureiro</h1>
+        <div class="gold-container">
+            @if (!isOwnerMode && ClienteAtivo != null)
+            {
+                <div class="gold-display">
+                    <span class="coin-icon">🟡</span> @ClienteAtivo.Saldo PO (Na Bolsa)
+                </div>
+                <div class="gold-remaining">
+                    Após Compra: @RemainingGold PO
+                </div>
+            }
+            else if (!isOwnerMode)
+            {
+                <div class="gold-display" style="color: #888; border-color: #555;">
+                    Selecione um aventureiro
+                </div>
+            }
+        </div>
+    </header>
+
+    <nav class="rpg-navbar">
+        <button class="nav-tab @(!isOwnerMode ? "active" : "")" @onclick="() => SetMode(false)">
+            🗡️ Mercado (Cliente)
+        </button>
+        <button class="nav-tab @(isOwnerMode ? "active" : "")" @onclick="() => SetMode(true)">
+            📜 Painel do Proprietário
+        </button>
+    </nav>
+
+    @if (isOwnerMode)
+    {
+        <div class="dashboard-layout">
+            <div class="owner-content">
+
+                @if (menuProprietarioAtual == "Estoque")
+                {
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <section class="stock-section panel">
+                            <h2 class="font-cinzel">Visão Geral do Estoque</h2>
+                            <div class="scrollable-container">
+                                <div class="stock-list">
+                                    @foreach (var item in MarketItems)
+                                    {
+                                        <div class="stock-item">
+                                            <span class="item-name">@ObterIcone(item.Tipo) @item.Nome</span>
+                                            <span class="item-price">💰 @item.Preco PO (Estoque: @item.Quantidade)</span>
+                                        </div>
+                                    }
+                                    @if (MarketItems.Count == 0)
+                                    {
+                                        <p class="empty-msg">O estoque está vazio. Forje novos itens.</p>
+                                    }
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="manage-section panel">
+                            <h2 class="font-cinzel">Ferramentas de Gerenciamento</h2>
+
+                            <div style="display: grid; gap: 10px;">
+                                <p style="color: #aaa; font-size: 0.9rem; margin-top: -10px; text-align: center;">
+                                    Selecione um item para repor unidades
+                                </p>
+                                <select @bind="itemSelecionadoId" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;">
+                                    <option value="0">-- Selecione um item --</option>
+                                    @foreach (var item in MarketItems)
+                                    {
+                                        <option value="@item.Id">@item.Nome</option>
+                                    }
+                                </select>
+
+                                @if (itemSelecionadoId != 0)
+                                {
+                                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                                        <span style="color: #c9b48f;">Adicionar ao estoque:</span>
+                                        <input @bind="quantidadeParaAdicionar" type="number" min="1" placeholder="Qtd." style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px; width: 100px;" />
+                                        <button class="btn-action-primary" style="flex-grow: 1;" @onclick="SalvarReposicaoEstoque">Repor Estoque</button>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(mensagemEstoque))
+                                {
+                                    <p style="color: #d4af37; margin-top: 5px; font-weight: bold; text-align: center;">@mensagemEstoque</p>
+                                }
+                            </div>
+
+                            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed #5c4a3d;">
+                                <p style="color: #aaa; font-size: 0.9rem; text-align: center; margin-top: -5px; margin-bottom: 15px;">
+                                    Selecione um item para alterar seu valor (PO)
+                                </p>
+                                <select @bind="itemParaAtualizarPrecoId" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px; width: 100%;">
+                                    <option value="0">-- Selecione um item --</option>
+                                    @foreach (var item in MarketItems)
+                                    {
+                                        <option value="@item.Id">@item.Nome (Atual: @item.Preco PO)</option>
+                                    }
+                                </select>
+
+                                @if (itemParaAtualizarPrecoId != 0)
+                                {
+                                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                                        <span style="color: #c9b48f;">Novo Preço:</span>
+                                        <input @bind="novoPrecoItem" type="number" step="0.01" min="0" placeholder="PO" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px; width: 100px;" />
+                                        <button class="btn-action-primary" style="flex-grow: 1;" @onclick="ExecutarAtualizacaoPreco">Atualizar Preço</button>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(mensagemPreco))
+                                {
+                                    <p style="color: #d4af37; margin-top: 5px; font-weight: bold; text-align: center;">@mensagemPreco</p>
+                                }
+                            </div>
+
+                            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed #5c4a3d;">
+                                <p style="color: #e57373; font-size: 0.9rem; text-align: center; margin-top: -5px; margin-bottom: 15px;">
+                                    Área de Exclusão (Cuidado: Esta ação não pode ser desfeita)
+                                </p>
+
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <select @bind="itemParaExcluirId" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #8b1c1c; border-radius: 4px; flex-grow: 1;">
+                                        <option value="0">-- Selecione um item para banir da loja --</option>
+                                        @foreach (var item in MarketItems)
+                                        {
+                                            <option value="@item.Id">@ObterIcone(item.Tipo) @item.Nome</option>
+                                        }
+                                    </select>
+                                    <button class="btn-confirm" style="padding: 8px 15px; width: auto; font-size: 1rem;" @onclick="ExecutarExclusaoItem">Excluir</button>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(mensagemExclusao))
+                                {
+                                    <p style="color: #e57373; margin-top: 10px; font-weight: bold; text-align: center;">@mensagemExclusao</p>
+                                }
+                            </div>
+                        </section>
+                    </div>
+                }
+                else if (menuProprietarioAtual == "Forjar")
+                {
+                    <section class="add-section panel">
+                        <h2 class="font-cinzel">Forjar Novo Item</h2>
+                        <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+
+                            <input @bind="NovoItem.Nome" placeholder="Nome do Item" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+
+                            <select @bind="tipoSelecionado" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;">
+                                <option value="Arma">Arma</option>
+                                <option value="Poção">Poção</option>
+                                <option value="Armadura">Armadura</option>
+                                <option value="Ferramenta">Ferramenta</option>
+                            </select>
+
+                            @if (tipoSelecionado == "Arma")
+                            {
+                                <input @bind="valorAtributo" placeholder="Dano (Ex: 1d8, 50)" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                            }
+                            else if (tipoSelecionado == "Poção")
+                            {
+                                <input @bind="valorAtributo" placeholder="Efeito (Ex: Cura 20 PV, Invisibilidade)" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                            }
+                            else if (tipoSelecionado == "Armadura")
+                            {
+                                <input @bind="valorAtributo" placeholder="Defesa (Ex: +5, 10)" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                            }
+                            else if (tipoSelecionado == "Ferramenta")
+                            {
+                                <input @bind="valorAtributo" placeholder="Utilidade (Ex: Quebrar pedras)" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                            }
+
+                            <input @bind="NovoItem.Preco" type="number" step="0.01" placeholder="Preço (PO)" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                            <input @bind="NovoItem.Quantidade" type="number" placeholder="Quantidade Inicial em Estoque" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;" />
+                        </div>
+
+                        <button class="btn-action-primary" style="width: 100%;" @onclick="SalvarNovoItem">Adicionar ao Banco de Dados</button>
+
+                        @if (!string.IsNullOrEmpty(mensagemAviso))
+                        {
+                            <p style="color: #d4af37; margin-top: 15px; font-weight: bold; text-align: center;">@mensagemAviso</p>
+                        }
+                    </section>
+                }
+                else if (menuProprietarioAtual == "Financeiro")
+                {
+                    <section class="panel">
+                        <h2 class="font-cinzel">Relatório Financeiro</h2>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed #5c4a3d; padding-bottom: 15px;">
+                            <h3 style="color: #c9b48f; margin: 0;">Total Arrecadado:</h3>
+                            <span class="final-total font-cinzel">💰 @ReceitaTotal PO</span>
+                        </div>
+
+                        @if (ListaDeVendas.Count > 0)
+                        {
+                            <div class="chart-wrapper">
+                                <div class="rpg-pie-chart" style="background: @EstiloGraficoPizza;"></div>
+                                <div class="chart-legend-box">
+                                    <div class="legend-item"><div class="legend-color" style="background: #e74c3c;"></div><span>⚔️ Armas: @PercArmas.ToString("0.0")%</span></div>
+                                    <div class="legend-item"><div class="legend-color" style="background: #2ecc71;"></div><span>🧪 Poções: @PercPocoes.ToString("0.0")%</span></div>
+                                    <div class="legend-item"><div class="legend-color" style="background: #3498db;"></div><span>🛡️ Armaduras: @PercArmaduras.ToString("0.0")%</span></div>
+                                    <div class="legend-item"><div class="legend-color" style="background: #f1c40f;"></div><span>⚒️ Ferramentas: @PercFerramentas.ToString("0.0")%</span></div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="scrollable-container">
+                            @if (ListaDeVendas.Count == 0)
+                            {
+                                <p class="empty-msg">Nenhuma venda foi realizada ainda. A taverna está às moscas!</p>
+                            }
+                            else
+                            {
+                                <table class="finance-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Aventureiro</th>
+                                            <th>Item Adquirido</th>
+                                            <th>Qtd.</th>
+                                            <th>Total (PO)</th>
+                                            <th>Horário da Venda</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var venda in ListaDeVendas)
+                                        {
+                                            <tr>
+                                                <td>#@venda.Id</td>
+                                                <td style="font-weight: bold; color: #c9b48f;">@venda.NomeCliente</td>
+                                                <td>@venda.NomeItem</td>
+                                                <td>@venda.Quantidade</td>
+                                                <td style="color: #ffd700; font-weight: bold;">@venda.ValorTotal PO</td>
+                                                <td style="font-size: 0.85rem; color: #888;">@venda.DataVenda.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </section>
+                }
+                else if (menuProprietarioAtual == "Aventureiros")
+                {
+                    <section class="panel">
+                        <h2 class="font-cinzel">Registro de Aventureiros</h2>
+                        <div class="scrollable-container">
+                            @if (ListaDeClientes.Count == 0)
+                            {
+                                <p class="empty-msg">Nenhum cliente cadastrado no banco de dados.</p>
+                            }
+                            else
+                            {
+                                <table class="finance-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Classe/Tier</th>
+                                            <th>Saldo Atual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var cli in ListaDeClientes)
+                                        {
+                                            <tr>
+                                                <td>#@cli.IdUsuario</td>
+                                                <td><span style="font-weight: bold;">@cli.NomeUsuario</span></td>
+                                                <td>@cli.TipoUsuario</td>
+                                                <td style="color: #ffd700; font-weight: bold;">💰 @cli.Saldo PO</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+
+            <aside class="sidebar-panel">
+                <h3 class="font-cinzel">Administração</h3>
+                <button class="sidebar-btn @(menuProprietarioAtual == "Estoque" ? "active" : "")" @onclick='() => AlterarMenuProprietario("Estoque")'>📦 Controle de Estoque</button>
+                <button class="sidebar-btn @(menuProprietarioAtual == "Forjar" ? "active" : "")" @onclick='() => AlterarMenuProprietario("Forjar")'>⚒️ Forjar Novo Item</button>
+                <button class="sidebar-btn @(menuProprietarioAtual == "Financeiro" ? "active" : "")" @onclick='() => AlterarMenuProprietario("Financeiro")'>📈 Relatório Financeiro</button>
+                <button class="sidebar-btn @(menuProprietarioAtual == "Aventureiros" ? "active" : "")" @onclick='() => AlterarMenuProprietario("Aventureiros")'>🛡️ Clientes</button>
+            </aside>
+        </div>
+    }
+    else
+    {
+        <div class="customer-dashboard">
+
+            <aside class="sidebar-panel">
+                <h3 class="font-cinzel">Aventureiros</h3>
+                @if (ClienteAtivo != null)
+                {
+                    <div class="customer-profile @GetClasseCssCliente(ClienteAtivo.TipoUsuario)">
+                        <div style="font-size: 3rem; margin-bottom: 5px;">🧙‍♂️</div>
+                        <h4 style="margin: 0; font-family: 'Cinzel', serif;">@ClienteAtivo.NomeUsuario</h4>
+                        <p style="font-size: 0.85rem; margin-top: 2px; font-weight: bold;">@ClienteAtivo.TipoUsuario</p>
+                    </div>
+                }
+                <p style="color: #aaa; font-size: 0.85rem; text-align: center;">Quem está no balcão?</p>
+                <div class="scrollable-container" style="max-height: 240px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        @foreach (var cli in ListaDeClientes)
+                        {
+                            <button class="sidebar-btn @(ClienteAtivo?.IdUsuario == cli.IdUsuario ? "active" : "")" style="font-size: 0.9rem;" @onclick="() => SelecionarCliente(cli)">👤 @cli.NomeUsuario</button>
+                        }
+                    </div>
+                </div>
+            </aside>
+
+            <section class="market-section">
+                <div class="filter-bar">
+                    <span style="color: #c9b48f; font-weight: bold; font-family: 'Cinzel', serif;">Filtros:</span>
+                    <div style="display: flex; gap: 5px; flex-grow: 1;">
+                        <input @bind="FiltroNomeBusca" placeholder="Buscar por aproximação..." style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px; flex-grow: 1;" />
+                        <button class="btn-action-primary" style="padding: 8px 15px;" @onclick="DispararBuscaPorNome">🔍 Buscar</button>
+                        @if (!string.IsNullOrWhiteSpace(FiltroNomeBusca))
+                        {
+                            <button class="btn-confirm" style="padding: 8px 15px; width: auto; background: #3a0808; border-color: #5c0f0f; text-shadow: none;" @onclick="LimparBuscaNome">❌ Limpar</button>
+                        }
+                    </div>
+                    <select value="@FiltroTipoBusca" @onchange="BuscarPorTipoNoBanco" style="padding: 8px; background: #1a1a1a; color: #fff; border: 1px solid #5c4a3d; border-radius: 4px;">
+                        <option value="Todos">Todos os Tipos</option>
+                        <option value="Arma">⚔️ Armas</option>
+                        <option value="Poção">🧪 Poções</option>
+                        <option value="Armadura">🛡️ Armaduras</option>
+                        <option value="Ferramenta">⚒️ Ferramentas</option>
+                    </select>
+                </div>
+
+                <div class="panel">
+                    <h2 class="font-cinzel" style="margin-top: 0;">Mercado da Guilda</h2>
+                    <div class="scrollable-container" style="max-height: 520px;">
+                        @if (ClienteAtivo == null)
+                        {
+                            <div class="placeholder-panel" style="padding: 20px;">
+                                <p>Por favor, selecione um aventureiro na lista ao lado para iniciar as compras.</p>
+                            </div>
+                        }
+                        else if (!DisplayItems.Any())
+                        {
+                            <div class="placeholder-panel" style="padding: 20px;">
+                                <p>Nenhum item retornado do banco de dados para este filtro.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="market-grid">
+                                @foreach (var item in DisplayItems)
+                                {
+                                    <div class="market-card">
+                                        <div class="item-icon">@ObterIcone(item.Tipo)</div>
+                                        <h3>@item.Nome</h3>
+                                        <p style="font-size: 0.8rem; min-height: 35px;">@item.Descricao</p>
+                                        <p style="font-size: 0.8rem; color: #888; margin: 2px 0;">Estoque: @item.Quantidade</p>
+                                        <div class="price" style="margin: 5px 0;">💰 @item.Preco PO</div>
+                                        <button class="btn-add" @onclick="() => AddToCart(item)" disabled="@(item.Preco > RemainingGold || item.Quantidade <= 0)">Adicionar</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <section class="cart-section panel">
+                <h2 class="font-cinzel">Meu Carrinho</h2>
+                @if (ClienteAtivo == null)
+                {
+                    <p class="empty-msg">Aguardando cliente...</p>
+                }
+                else if (shoppingCart.Count == 0)
+                {
+                    <p class="empty-msg">Sua bolsa está vazia, @ClienteAtivo.NomeUsuario.</p>
+                }
+                else
+                {
+                    <div class="receipt-container">
+                        <div class="scrollable-container" style="max-height: 280px;">
+                            <ul class="cart-item-list">
+                                @foreach (var cartItem in shoppingCart)
+                                {
+                                    <li class="cart-item">
+                                        <div class="item-details">
+                                            <span class="item-name" style="font-size: 0.9rem;">@ObterIcone(cartItem.MarketItem.Tipo) @cartItem.MarketItem.Nome</span>
+                                            <span class="item-unit-price">@cartItem.MarketItem.Preco PO / ud.</span>
+                                        </div>
+                                        <div class="qty-controls">
+                                            <button class="btn-qty" @onclick="() => DecreaseQty(cartItem)">-</button>
+                                            <span class="item-qty">@cartItem.QuantidadeComprada</span>
+                                            <button class="btn-qty" @onclick="() => IncreaseQty(cartItem)" disabled="@(cartItem.MarketItem.Preco > RemainingGold || cartItem.QuantidadeComprada >= cartItem.MarketItem.Quantidade)">+</button>
+                                        </div>
+                                        <span class="item-total-price" style="font-size: 0.95rem;">💰 @(cartItem.MarketItem.Preco* cartItem.QuantidadeComprada)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        <div class="receipt-footer">
+                            <div class="receipt-divider"></div>
+                            <div class="total-line">
+                                <span>TOTAL:</span>
+                                <span class="final-total font-cinzel" style="font-size: 1.4rem;">💰 @CartTotal PO</span>
+                            </div>
+                            <button class="btn-confirm" @onclick="FinalizePurchase" disabled="@(shoppingCart.Count == 0)">Confirmar Compra</button>
+                            @if (!string.IsNullOrEmpty(mensagemErroCompra))
+                            {
+                                <p style="color: #e57373; font-size: 0.85rem; margin-top: 10px; text-align: center;">@mensagemErroCompra</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </section>
+        </div>
+    }
+</div>
+@code {
+    private ItemDAO dao = new ItemDAO();
+    private VendaDAO vendaDao = new VendaDAO();
+    private ClienteDAO clienteDao = new ClienteDAO();
+
+    private bool isOwnerMode = false;
+    private string menuProprietarioAtual = "Estoque";
+
+    private List<ItemRPG> MarketItems = new();
+    private List<Venda> ListaDeVendas = new();
+    private List<Cliente> ListaDeClientes = new();
+    private List<CartItem> shoppingCart = new();
+    private List<ItemRPG> DisplayItems = new();
+
+    private Cliente ClienteAtivo = null;
+
+    private string FiltroNomeBusca = "";
+    private string FiltroTipoBusca = "Todos";
+
+    private decimal PercArmas = 0;
+    private decimal PercPocoes = 0;
+    private decimal PercArmaduras = 0;
+    private decimal PercFerramentas = 0;
+    private string EstiloGraficoPizza = "#2c251d";
+
+    private string mensagemAviso = "";
+    private string mensagemEstoque = "";
+    private string mensagemPreco = "";
+    private string mensagemExclusao = "";
+    private string mensagemErroCompra = "";
+
+    private string tipoSelecionado = "Arma";
+    private string valorAtributo = "";
+    private ItemRPG NovoItem = new ItemRPG();
+    private int itemSelecionadoId = 0;
+    private int quantidadeParaAdicionar = 0;
+    private int itemParaAtualizarPrecoId = 0;
+    private decimal novoPrecoItem = 0m;
+    private int itemParaExcluirId = 0;
+
+    private decimal CartTotal => shoppingCart.Sum(i => i.MarketItem.Preco * i.QuantidadeComprada);
+    private decimal RemainingGold => (ClienteAtivo?.Saldo ?? 0) - CartTotal;
+    private decimal ReceitaTotal => ListaDeVendas.Sum(v => v.ValorTotal);
+
+    private void DispararBuscaPorNome()
+    {
+        FiltroTipoBusca = "Todos";
+        try
+        {
+            if (string.IsNullOrWhiteSpace(FiltroNomeBusca)) AtualizarListaDeItens();
+            else DisplayItems = dao.BuscarItensPorNome(FiltroNomeBusca) ?? new List<ItemRPG>();
+        }
+        catch { DisplayItems = new List<ItemRPG>(); }
+    }
+
+    private void LimparBuscaNome()
+    {
+        FiltroNomeBusca = "";
+        AtualizarListaDeItens();
+    }
+
+    private void BuscarPorTipoNoBanco(ChangeEventArgs e)
+    {
+        FiltroTipoBusca = e.Value?.ToString() ?? "Todos";
+        FiltroNomeBusca = "";
+        try
+        {
+            if (FiltroTipoBusca == "Todos") AtualizarListaDeItens();
+            else DisplayItems = dao.BuscarItensPorTipo(FiltroTipoBusca) ?? new List<ItemRPG>();
+        }
+        catch { DisplayItems = new List<ItemRPG>(); }
+    }
+
+    private void CalcularEstatisticasGrafico()
+    {
+        if (ListaDeVendas == null || !ListaDeVendas.Any() || MarketItems == null)
+        {
+            EstiloGraficoPizza = "#2c251d";
+            return;
+        }
+
+        decimal totalArmas = 0, totalPocoes = 0, totalArmaduras = 0, totalFerramentas = 0;
+
+        foreach (var venda in ListaDeVendas)
+        {
+            var item = MarketItems.FirstOrDefault(i => i.Id == venda.ItemId);
+            if (item == null) continue;
+
+            if (item.Tipo == "Arma") totalArmas += venda.ValorTotal;
+            else if (item.Tipo == "Poção") totalPocoes += venda.ValorTotal;
+            else if (item.Tipo == "Armadura") totalArmaduras += venda.ValorTotal;
+            else if (item.Tipo == "Ferramenta") totalFerramentas += venda.ValorTotal;
+        }
+
+        decimal totalGeral = totalArmas + totalPocoes + totalArmaduras + totalFerramentas;
+
+        if (totalGeral > 0)
+        {
+            PercArmas = (totalArmas / totalGeral) * 100;
+            PercPocoes = (totalPocoes / totalGeral) * 100;
+            PercArmaduras = (totalArmaduras / totalGeral) * 100;
+            PercFerramentas = (totalFerramentas / totalGeral) * 100;
+
+            decimal f1 = PercArmas;
+            decimal f2 = f1 + PercPocoes;
+            decimal f3 = f2 + PercArmaduras;
+
+            var culture = System.Globalization.CultureInfo.InvariantCulture;
+
+            string cF1 = f1.ToString("0.0", culture);
+            string cF2 = f2.ToString("0.0", culture);
+            string cF3 = f3.ToString("0.0", culture);
+
+            EstiloGraficoPizza = $"conic-gradient(#e74c3c 0% {cF1}%, #2ecc71 {cF1}% {cF2}%, #3498db {cF2}% {cF3}%, #f1c40f {cF3}% 100%)";
+        }
+        else
+        {
+            EstiloGraficoPizza = "#2c251d";
+        }
+    }
+
+    private string ObterIcone(string tipo)
+    {
+        return tipo switch { "Arma" => "⚔️", "Poção" => "🧪", "Armadura" => "🛡️", "Ferramenta" => "⚒️", _ => "📦" };
+    }
+
+    private string GetClasseCssCliente(string tipoUsuario)
+    {
+        if (string.IsNullOrEmpty(tipoUsuario)) return "cliente-comum";
+        string t = tipoUsuario.ToLower();
+        if (t.Contains("premium") || t.Contains("ouro")) return "cliente-premium";
+        if (t.Contains("prata") || t.Contains("silver")) return "cliente-prata";
+        return "cliente-comum";
+    }
+
+    protected override void OnInitialized() => AtualizarTudo();
+
+    private void AtualizarTudo()
+    {
+        AtualizarListaDeItens();
+        AtualizarListaDeClientes();
+        if (ClienteAtivo != null) ClienteAtivo = ListaDeClientes.FirstOrDefault(c => c.IdUsuario == ClienteAtivo.IdUsuario);
+    }
+
+    private void AtualizarListaDeItens()
+    {
+        try { MarketItems = dao.BuscarItensCadastrados() ?? new List<ItemRPG>(); DisplayItems = MarketItems; }
+        catch { MarketItems = new List<ItemRPG>(); DisplayItems = new List<ItemRPG>(); }
+    }
+
+    private void AtualizarListaDeVendas()
+    {
+        try { ListaDeVendas = vendaDao.BuscarListaDeVendas() ?? new List<Venda>(); }
+        catch { ListaDeVendas = new List<Venda>(); }
+    }
+
+    private void AtualizarListaDeClientes()
+    {
+        try { ListaDeClientes = clienteDao.BuscarClientesCadastrados() ?? new List<Cliente>(); }
+        catch { ListaDeClientes = new List<Cliente>(); }
+    }
+
+    private void SelecionarCliente(Cliente cli)
+    {
+        if (ClienteAtivo?.IdUsuario != cli.IdUsuario) { shoppingCart.Clear(); mensagemErroCompra = ""; }
+        ClienteAtivo = cli;
+    }
+
+    private void AlterarMenuProprietario(string novoMenu)
+    {
+        menuProprietarioAtual = novoMenu;
+        LimparMensagensGerenciamento();
+        mensagemAviso = "";
+
+        if (novoMenu == "Financeiro") { AtualizarListaDeVendas(); CalcularEstatisticasGrafico(); }
+        if (novoMenu == "Aventureiros") AtualizarListaDeClientes();
+    }
+
+    private void SalvarReposicaoEstoque()
+    {
+        try
+        {
+            LimparMensagensGerenciamento();
+            if (itemSelecionadoId == 0) { mensagemEstoque = "Erro: Selecione um item válido."; return; }
+            if (quantidadeParaAdicionar <= 0) { mensagemEstoque = "Erro: A quantidade deve ser > zero."; return; }
+
+            dao.ReporEstoque(itemSelecionadoId, quantidadeParaAdicionar);
+            mensagemEstoque = $"Foram adicionadas {quantidadeParaAdicionar} unidades ao estoque!";
+            quantidadeParaAdicionar = 0; itemSelecionadoId = 0;
+            AtualizarListaDeItens();
+        }
+        catch (Exception ex) { mensagemEstoque = "Falha ao repor estoque: " + ex.Message; }
+    }
+
+    private void ExecutarAtualizacaoPreco()
+    {
+        try
+        {
+            LimparMensagensGerenciamento();
+            if (itemParaAtualizarPrecoId == 0) { mensagemPreco = "Erro: Selecione um item válido."; return; }
+            if (novoPrecoItem < 0) { mensagemPreco = "Erro: O preço não pode ser negativo."; return; }
+
+            dao.AtualizarPreco(itemParaAtualizarPrecoId, novoPrecoItem);
+            mensagemPreco = $"Preço atualizado para {novoPrecoItem} PO!";
+            novoPrecoItem = 0m; itemParaAtualizarPrecoId = 0;
+            AtualizarListaDeItens();
+        }
+        catch (Exception ex) { mensagemPreco = "Falha ao atualizar preço: " + ex.Message; }
+    }
+
+    private void ExecutarExclusaoItem()
+    {
+        try
+        {
+            LimparMensagensGerenciamento();
+            if (itemParaExcluirId == 0) { mensagemExclusao = "Erro: Selecione um item para excluir."; return; }
+
+            dao.ExcluirItem(itemParaExcluirId);
+            mensagemExclusao = "Item banido do estoque!";
+            itemParaExcluirId = 0;
+            shoppingCart.RemoveAll(c => c.MarketItem.Id == itemParaExcluirId);
+            AtualizarListaDeItens();
+        }
+        catch (Exception ex) { mensagemExclusao = "Falha ao excluir item: " + ex.Message; }
+    }
+
+    private void LimparMensagensGerenciamento()
+    {
+        mensagemEstoque = ""; mensagemPreco = ""; mensagemExclusao = "";
+    }
+
+    private void SalvarNovoItem()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(valorAtributo)) { mensagemAviso = "Preencha o atributo específico."; return; }
+
+            string descricaoGerada = tipoSelecionado switch
+            {
+                "Arma" => $"Dá {valorAtributo} de dano no inimigo",
+                "Poção" => $"Efeito de {valorAtributo}",
+                "Armadura" => $"Defesa de {valorAtributo}",
+                "Ferramenta" => valorAtributo,
+                _ => ""
+            };
+
+            var itemParaSalvar = new ItemRPG(1, NovoItem.Nome, tipoSelecionado, NovoItem.Preco, NovoItem.Quantidade, descricaoGerada);
+            dao.AdicionarItem(itemParaSalvar);
+            mensagemAviso = "Item forjado com sucesso!";
+
+            NovoItem = new ItemRPG(); tipoSelecionado = "Arma"; valorAtributo = "";
+            AtualizarListaDeItens();
+        }
+        catch (Exception ex) { mensagemAviso = "Falha ao forjar: " + ex.Message; }
+    }
+
+    private void SetMode(bool ownerMode)
+    {
+        isOwnerMode = ownerMode; shoppingCart.Clear();
+        mensagemAviso = ""; mensagemErroCompra = ""; LimparMensagensGerenciamento();
+        menuProprietarioAtual = "Estoque"; FiltroNomeBusca = ""; FiltroTipoBusca = "Todos";
+        AtualizarTudo();
+    }
+
+    private void AddToCart(ItemRPG itemToBuy)
+    {
+        if (ClienteAtivo == null || itemToBuy.Preco > RemainingGold || itemToBuy.Quantidade <= 0) return;
+
+        var existingCartItem = shoppingCart.FirstOrDefault(c => c.MarketItem.Id == itemToBuy.Id);
+        if (existingCartItem != null)
+        {
+            if (existingCartItem.QuantidadeComprada < itemToBuy.Quantidade) existingCartItem.QuantidadeComprada++;
+        }
+        else { shoppingCart.Add(new CartItem { MarketItem = itemToBuy, QuantidadeComprada = 1 }); }
+    }
+
+    private void IncreaseQty(CartItem cartItem)
+    {
+        if (cartItem.MarketItem.Preco > RemainingGold || cartItem.QuantidadeComprada >= cartItem.MarketItem.Quantidade) return;
+        cartItem.QuantidadeComprada++;
+    }
+
+    private void DecreaseQty(CartItem cartItem)
+    {
+        cartItem.QuantidadeComprada--;
+        if (cartItem.QuantidadeComprada <= 0) shoppingCart.Remove(cartItem);
+    }
+
+    private void FinalizePurchase()
+    {
+        if (ClienteAtivo == null || CartTotal > ClienteAtivo.Saldo) return;
+        try
+        {
+            bool sucessoDesconto = clienteDao.DescontarSaldo(ClienteAtivo.IdUsuario, CartTotal);
+            if (sucessoDesconto)
+            {
+                foreach (var cartItem in shoppingCart)
+                {
+                    // Registra a venda
+                    var novaVenda = new Venda(ClienteAtivo.IdUsuario, cartItem.MarketItem.Id, cartItem.QuantidadeComprada, (cartItem.MarketItem.Preco * cartItem.QuantidadeComprada));
+                    vendaDao.AdicionarVenda(novaVenda);
+
+                    // AQUI ESTÁ: Diminui o estoque no banco de dados!
+                    dao.DiminuirEstoque(cartItem.MarketItem.Id, cartItem.QuantidadeComprada);
+                }
+                shoppingCart.Clear(); mensagemErroCompra = ""; AtualizarTudo();
+            }
+            else { mensagemErroCompra = "Transação recusada: Saldo insuficiente ou erro no banco."; }
+        }
+        catch (Exception ex) { mensagemErroCompra = "Erro ao processar compra: " + ex.Message; }
+    }
+
+    public class CartItem
+    {
+        public ItemRPG MarketItem { get; set; } = new();
+        public int QuantidadeComprada { get; set; }
+    }
+}

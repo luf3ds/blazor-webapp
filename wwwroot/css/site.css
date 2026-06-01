@@ -1,0 +1,628 @@
+/* =========================================
+   FONTES
+========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Laila:wght@400;700&display=swap');
+
+.font-cinzel {
+    font-family: 'Cinzel', serif;
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL
+========================================= */
+.rpg-page-container {
+    font-family: 'Laila', serif;
+    background-color: #1a1a1a;
+    color: #e0d8c3;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: radial-gradient(circle at center, #2a2a2a 0%, #111 100%);
+}
+
+/* =========================================
+   CABEÇALHO & MOEDAS
+========================================= */
+.rpg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+    .rpg-header h1 {
+        color: #d4af37;
+        margin: 0;
+        font-size: 2.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+.gold-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.gold-display {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ffd700;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px 25px;
+    border-radius: 8px;
+    border: 1px solid #b89947;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.gold-remaining {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    font-style: italic;
+    margin-right: 5px;
+}
+
+/* =========================================
+   BARRA DE NAVEGAÇÃO TEMÁTICA
+========================================= */
+.rpg-navbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #5c4a3d;
+    padding-bottom: 10px;
+}
+
+.nav-tab {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+    .nav-tab:hover {
+        color: #c9b48f;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .nav-tab.active {
+        color: #d4af37;
+        border-bottom: 3px solid #d4af37;
+        text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+    }
+
+/* =========================================
+   PAINÉIS GERAIS
+========================================= */
+.panel {
+    background-color: #2c251d;
+    border: 2px solid #5c4a3d;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.6);
+}
+
+    .panel h2 {
+        color: #c9b48f;
+        border-bottom: 1px dashed #5c4a3d;
+        padding-bottom: 10px;
+        margin-top: 0;
+        text-align: center;
+    }
+
+.empty-msg {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* =========================================
+   GRIDS E COMPORTAMENTOS DASHBOARD
+========================================= */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+}
+
+.customer-dashboard {
+    display: grid;
+    grid-template-columns: 240px 1fr 380px;
+    gap: 20px;
+    align-items: start;
+}
+
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.sidebar-panel {
+    background-color: #1a1510;
+    border: 2px solid #5c4a3d;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: sticky;
+    top: 20px;
+}
+
+    .sidebar-panel h3 {
+        color: #d4af37;
+        text-align: center;
+        border-bottom: 1px dashed #5c4a3d;
+        padding-bottom: 10px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+
+.sidebar-btn {
+    background: #2c251d;
+    color: #c9b48f;
+    border: 1px solid #3d3126;
+    padding: 12px;
+    text-align: left;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .sidebar-btn:hover {
+        background: #3d3126;
+        color: #fff;
+    }
+
+    .sidebar-btn.active {
+        background: linear-gradient(to right, #755f4c, #5c4a3d);
+        color: #fff;
+        border-color: #d4af37;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+.placeholder-panel {
+    text-align: center;
+    padding: 50px 20px;
+    color: #888;
+}
+
+/* =========================================
+   COMPORTAMENTO DE ROLAGEM MÁXIMA
+========================================= */
+.scrollable-container {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+    .scrollable-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollable-container::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+    }
+
+    .scrollable-container::-webkit-scrollbar-thumb {
+        background: #5c4a3d;
+        border-radius: 4px;
+        border: 1px solid #3d3126;
+    }
+
+        .scrollable-container::-webkit-scrollbar-thumb:hover {
+            background: #755f4c;
+        }
+
+/* =========================================
+   CARRINHO DE COMPRAS (Recibo)
+========================================= */
+.receipt-container {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #3d3126;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.cart-item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px dashed #3d3126;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-item .item-name {
+    font-weight: bold;
+    color: #d4af37;
+    font-size: 1rem;
+}
+
+.item-unit-price {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.qty-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #5c4a3d;
+    border-radius: 4px;
+    padding: 3px;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.btn-qty {
+    background: transparent;
+    border: none;
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    .btn-qty:hover:not(:disabled) {
+        color: #fff;
+    }
+
+.item-qty {
+    font-weight: bold;
+    font-size: 1.1rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.item-total-price {
+    font-weight: bold;
+    color: #ffd700;
+    text-align: right;
+    font-size: 1.05rem;
+}
+
+.receipt-footer {
+    padding-top: 15px;
+    margin-top: 10px;
+}
+
+.receipt-divider {
+    border-top: 2px dashed #b89947;
+    margin-bottom: 15px;
+}
+
+.total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #e0d8c3;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.final-total {
+    font-size: 1.8rem;
+    color: #ffd700;
+}
+
+/* =========================================
+   MERCADO CARD
+========================================= */
+.market-card {
+    background: #382e24;
+    border: 1px solid #755f4c;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+    .market-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+        border-color: #b89947;
+    }
+
+    .market-card h3 {
+        font-family: 'Cinzel', serif;
+        font-size: 1.1rem;
+        color: #e0d8c3;
+        margin-top: 0;
+    }
+
+    .market-card p {
+        font-size: 0.9rem;
+        color: #aaa;
+        min-height: 45px;
+        flex-grow: 1;
+    }
+
+    .market-card:hover .item-icon {
+        transform: scale(1.2);
+        transition: transform 0.3s ease;
+    }
+
+.item-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.price {
+    font-weight: bold;
+    color: #ffd700;
+    margin: 15px 0;
+    font-size: 1.1rem;
+}
+
+/* =========================================
+   TABELAS E ESTOQUES
+========================================= */
+.stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stock-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    border: 1px solid #3d3126;
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    .finance-table th {
+        background-color: #3d3126;
+        color: #d4af37;
+        padding: 12px;
+        text-align: left;
+        font-family: 'Cinzel', serif;
+    }
+
+    .finance-table td {
+        padding: 12px;
+        border-bottom: 1px dashed #5c4a3d;
+        color: #e0d8c3;
+    }
+
+    .finance-table tr:hover td {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+/* =========================================
+   BARRA DE FILTROS E PERFIS DE CLIENTE
+========================================= */
+.filter-bar {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #5c4a3d;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.customer-profile {
+    text-align: center;
+    padding: 15px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 8px;
+    border: 2px solid #3d3126;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.cliente-premium {
+    border-color: #9b59b6 !important;
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.4), inset 0 0 10px rgba(155, 89, 182, 0.2);
+}
+
+    .cliente-premium h4 {
+        color: #e8c4f9 !important;
+        text-shadow: 0 0 12px #9b59b6;
+    }
+
+    .cliente-premium p {
+        color: #d7bde2 !important;
+    }
+
+.cliente-prata {
+    border-color: #bdc3c7 !important;
+    box-shadow: 0 0 10px rgba(189, 195, 199, 0.3), inset 0 0 8px rgba(189, 195, 199, 0.1);
+}
+
+    .cliente-prata h4 {
+        color: #ffffff !important;
+        text-shadow: 0 0 8px #bdc3c7;
+    }
+
+    .cliente-prata p {
+        color: #ecf0f1 !important;
+    }
+
+.cliente-comum {
+    border-color: #cd7f32 !important;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.2);
+}
+
+    .cliente-comum h4 {
+        color: #ffebcd !important;
+        text-shadow: 0 0 8px rgba(205, 127, 50, 0.8);
+    }
+
+    .cliente-comum p {
+        color: #deb887 !important;
+    }
+
+/* =========================================
+   ELEMENTOS GRÁFICOS DE PIZZA
+========================================= */
+.chart-wrapper {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px dashed #5c4a3d;
+}
+
+.rpg-pie-chart {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    border: 2px solid #5c4a3d;
+}
+
+.chart-legend-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.5);
+}
+
+/* =========================================
+   BOTÕES DE AÇÃO
+========================================= */
+.btn-add {
+    background: linear-gradient(to bottom, #755f4c, #5c4a3d);
+    color: #f4e8d1;
+    border: 1px solid #3d3126;
+    padding: 10px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+    .btn-add:hover:not(:disabled) {
+        background: linear-gradient(to bottom, #a0846c, #806852);
+    }
+
+.btn-confirm {
+    background: linear-gradient(to bottom, #8b1c1c, #5c0f0f);
+    color: #f4e8d1;
+    border: 1px solid #3a0808;
+    padding: 15px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s;
+}
+
+    .btn-confirm:hover:not(:disabled) {
+        background: linear-gradient(to bottom, #a32222, #751515);
+    }
+
+.btn-action-primary {
+    background-color: #d4af37;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-add:disabled,
+.btn-qty:disabled,
+.btn-confirm:disabled {
+    background: #444444 !important;
+    background-image: none !important;
+    color: #777777 !important;
+    border-color: #333333 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+/* =========================================
+   RESPONSIVIDADE
+========================================= */
+@media (max-width: 900px) {
+    .customer-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .rpg-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .gold-container {
+        align-items: center;
+    }
+
+    .chart-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
