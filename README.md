@@ -1,12 +1,12 @@
 # 🛡️ RPG Shop
 
-Sistema web desenvolvido em ASP.NET Core Blazor Server para gerenciamento de vendas de itens de RPG, utilizando PostgreSQL hospedado no Supabase.
+A web application developed with ASP.NET Core Blazor Server for managing RPG item sales, using PostgreSQL hosted on Supabase.
 
-## 📋 Sobre o Projeto
+## 📋 About the Project
 
-O RPG Shop é uma aplicação destinada ao controle de vendas de itens de RPG, permitindo o gerenciamento de clientes, produtos e vendas através de uma interface web desenvolvida com Blazor Server.
+RPG Shop is a web-based application designed to manage RPG item sales, allowing users to handle customers, products, and sales through a Blazor Server interface.
 
-O sistema utiliza:
+The system is built using:
 
 - ASP.NET Core 6
 - Blazor Server
@@ -16,29 +16,29 @@ O sistema utiliza:
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Technologies Used
 
-| Tecnologia | Descrição |
-|------------|------------|
-| .NET 6 | Framework principal |
-| Blazor Server | Interface Web |
-| PostgreSQL | Banco de Dados |
-| Supabase | Hospedagem do Banco |
-| Npgsql | Driver PostgreSQL para .NET |
+| Technology | Description |
+|------------|-------------|
+| .NET 6 | Main Framework |
+| Blazor Server | Web Interface |
+| PostgreSQL | Database Management System |
+| Supabase | Database Hosting Platform |
+| Npgsql | PostgreSQL Driver for .NET |
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📂 Project Structure
 
 ```text
 RpgShop/
 │
 ├── DAO/
 │   ├── Database.cs
-│   └── VendaDAO.cs
+│   └── SaleDAO.cs
 │
 ├── Models/
-│   └── Venda.cs
+│   └── Sale.cs
 │
 ├── Pages/
 │
@@ -50,109 +50,109 @@ RpgShop/
 
 ---
 
-## ⚙️ Funcionalidades
+## ⚙️ Features
 
-### Clientes
+### Customers
 
-- Cadastro de clientes
-- Consulta de clientes
+- Customer registration
+- Customer search and consultation
 
-### Itens RPG
+### RPG Items
 
-- Cadastro de itens
-- Consulta de itens
+- RPG item registration
+- RPG item search and consultation
 
-### Vendas
+### Sales
 
-- Registro de vendas
-- Associação entre cliente e item
-- Controle de quantidade
-- Cálculo do valor total
-- Histórico de vendas
+- Sales registration
+- Customer-item association
+- Quantity management
+- Total price calculation
+- Sales history tracking
 
 ---
 
-## 🗄️ Banco de Dados
+## 🗄️ Database
 
-O sistema utiliza PostgreSQL hospedado no Supabase.
+The system uses a PostgreSQL database hosted on Supabase.
 
-### Principais tabelas
+### Main Tables
 
-#### Clientes
+#### Customers
 
 ```sql
-clientes
+customers
 ```
 
-| Campo | Tipo |
+| Field | Type |
 |---------|---------|
-| id_usuario | int |
-| nome_usuario | varchar |
+| user_id | int |
+| user_name | varchar |
 
 ---
 
-#### Itens RPG
+#### RPG Items
 
 ```sql
-itens_rpg
+rpg_items
 ```
 
-| Campo | Tipo |
-|---------|---------|
-| id | int |
-| nome | varchar |
-
----
-
-#### Vendas
-
-```sql
-vendas
-```
-
-| Campo | Tipo |
+| Field | Type |
 |---------|---------|
 | id | int |
-| cliente_id | int |
+| name | varchar |
+
+---
+
+#### Sales
+
+```sql
+sales
+```
+
+| Field | Type |
+|---------|---------|
+| id | int |
+| customer_id | int |
 | item_id | int |
-| quantidade | int |
-| valor_total | decimal |
-| data_venda | timestamp |
+| quantity | int |
+| total_value | decimal |
+| sale_date | timestamp |
 
 ---
 
-## 🔄 Fluxo de Venda
+## 🔄 Sales Workflow
 
-1. Selecionar cliente
-2. Selecionar item
-3. Informar quantidade
-4. Calcular valor total
-5. Registrar venda
-6. Salvar no banco de dados
+1. Select a customer
+2. Select an item
+3. Enter the quantity
+4. Calculate the total value
+5. Register the sale
+6. Save the transaction to the database
 
 ---
 
-## 🛠️ Instalação
+## 🛠️ Installation
 
-### 1. Clonar o repositório
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/seu-usuario/rpg-shop.git
+git clone https://github.com/your-username/rpg-shop.git
 ```
 
-### 2. Acessar a pasta
+### 2. Navigate to the project directory
 
 ```bash
 cd rpg-shop
 ```
 
-### 3. Restaurar dependências
+### 3. Restore dependencies
 
 ```bash
 dotnet restore
 ```
 
-### 4. Executar o projeto
+### 4. Run the application
 
 ```bash
 dotnet run
@@ -160,7 +160,7 @@ dotnet run
 
 ---
 
-## 📦 Dependências
+## 📦 Dependencies
 
 ```xml
 <PackageReference Include="Npgsql" Version="6.0.13" />
@@ -168,37 +168,34 @@ dotnet run
 
 ---
 
-## 📄 Licença
+## 🏆 Team
 
-Projeto desenvolvido para fins acadêmicos.
+This project was developed for academic purposes as part of the **Desktop Applications** course at **Santa Cecília University (UNISANTA)**.
 
-## 👨‍💻 Equipe
+### 🤝 Contributors
 
-Projeto desenvolvido por:
-
-### 🤝 Colaboradores
-
-| Nome | GitHub |
+| Name | GitHub |
 |--------|--------|
 | Juan Victor Pereira Santos | [@juanVic7](https://github.com/juanVic7) |
-| Matheus Enrico Araújo Santos | [@V0rtexs](https://github.com/V0rtexs) |
+| Matheus Enrico Araujo Santos | [@V0rtexs](https://github.com/V0rtexs) |
 | Scott Kayllou Vitorino Melo | [@scottmelo2005-ops](https://github.com/scottmelo2005-ops) |
-| Rogério Gomes Lacerda | [@rogeriomaci3l](https://github.com/rogeriomaci3l) |
+| Rogerio Gomes Lacerda | [@rogeriomaci3l](https://github.com/rogeriomaci3l) |
 
-### Instituição
+### Institution
 
-**Universidade Santa Cecília (UNISANTA)**
+**Santa Cecília University (UNISANTA)**
 
-**Disciplina:** Aplicações para Desktop
-
----
-
-## 🤝 Agradecimentos
-
-Agradecemos aos professores, colegas e colaboradores que contribuíram com orientações, sugestões e testes durante o desenvolvimento deste projeto acadêmico.
+**Course:** Desktop Applications
 
 ---
 
-## 📄 Licença
+## 🤝 Acknowledgements
 
-Projeto desenvolvido exclusivamente para fins acadêmicos e educacionais.
+We would like to thank our professors, classmates, and collaborators for their guidance, feedback, and support throughout the development of this academic project.
+
+---
+
+## 📄 License
+
+This project was developed exclusively for academic and educational purposes.
+````
